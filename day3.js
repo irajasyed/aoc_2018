@@ -3,13 +3,14 @@ function getInputs (text) {
   let re = /#(\d*)\s@.(\d{1,4}), ?(\d{1,4}): (\d{1,4})x(\d{1,4})/
   let matches = text.match(re)
   if (matches) {
-    let data = matches.slice(1,6)
+    let data = matches.slice(1,6) // [ID, Y, X, Width, Height]
     return data.map( item => parseInt(item))
   }
   return []
 }
 
 function initFabricData () {
+  // Initialising 2D Array
   let totalInches = 1000;
   // let totalInches = 8;
   let fabricData = new Array(totalInches);
@@ -32,22 +33,22 @@ function mapFabrics (claims) {
     let WIDTH = claimData[3];
     let HEIGHT = claimData[4];
     let currentRow = X;
-    while(currentRow < X + HEIGHT) {
+    while(currentRow < X + HEIGHT) { // Filling Vertically / Iterating Rows
       let widthCounter = 0;
-      while(widthCounter < WIDTH) {
+      while(widthCounter < WIDTH) { // Filling Horizantally / Iterating Columns
         let currentFabricInchValue = fabricData[currentRow][Y + widthCounter]
         if ( currentFabricInchValue && currentFabricInchValue !== -1) {
           overlappingClaims++;
-          fabricData[currentRow][Y + widthCounter] = -1
+          fabricData[currentRow][Y + widthCounter] = -1 // -1 denotes Overlapped Inches.
           uniqueFabricClaims[currentFabricInchValue] = false
           uniqueFabricClaims[claimID] = false
-        } else if (currentFabricInchValue !== -1) {
+        } else if (currentFabricInchValue !== -1) { // Fabric marks for first time in its respective Inch.
           fabricData[currentRow][Y + widthCounter] = claimID;
           if (uniqueFabricClaims[claimID] !== false) { // if the claim is not registed as duplicate
             uniqueFabricClaims[claimID] = true
 
           }
-        } else {
+        } else { // When new Claim trying to overlap already Overlapped Inch.
           uniqueFabricClaims[claimID] = false
         }
         widthCounter++;
@@ -59,7 +60,7 @@ function mapFabrics (claims) {
   let uniqueID = 0
   totalIDS.forEach(id => {
       if (uniqueFabricClaims[id]) {
-        uniqueID = id
+        uniqueID = id // incase of multiple uniqueClaims, maintaining last unique Claim.
       }
   })
   console.log('OVERLAPPING CLAIMS: ' + overlappingClaims);
