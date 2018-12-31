@@ -1,47 +1,72 @@
 
 function getInputs (text) {
-  let re = /@.(\d{1,4}), ?(\d{1,4}): (\d{1,4})x(\d{1,4})/
+  let re = /#(\d*)\s@.(\d{1,4}), ?(\d{1,4}): (\d{1,4})x(\d{1,4})/
   let matches = text.match(re)
   if (matches) {
-    let data = matches.slice(1,5)
+    let data = matches.slice(1,6)
     return data.map( item => parseInt(item))
   }
   return []
 }
 
 function initFabricData () {
-  let fabricData = new Array(1000);
+  let totalInches = 1000;
+  // let totalInches = 8;
+  let fabricData = new Array(totalInches);
   for (let i=0; i < fabricData.length; i++) {
-    fabricData[i] = new Array(1000).fill(0)
+    fabricData[i] = new Array(totalInches).fill(0)
   }
   return fabricData;
 }
 
-function findOverlappingParts (claims) {
+function mapFabrics (claims) {
+  let uniqueFabricClaims = {}
   let fabricData = initFabricData();
   let overlappingClaims = 0;
   for (let i=0; i< claims.length; i++) {
-    let claimData = getInputs(claims[i]); // [Y, X, Width, Height];
-    let Y = claimData[0];
-    let X = claimData[1];
-    let WIDTH = claimData[2];
-    let HEIGHT = claimData[3];
+    let claimData = getInputs(claims[i]); // [ID, Y, X, Width, Height];
+    let claimID = claimData[0];
+    
+    let Y = claimData[1];
+    let X = claimData[2];
+    let WIDTH = claimData[3];
+    let HEIGHT = claimData[4];
     let currentRow = X;
     while(currentRow < X + HEIGHT) {
       let widthCounter = 0;
       while(widthCounter < WIDTH) {
-        if (fabricData[currentRow][Y + widthCounter] === 1) {
+        let currentFabricInchValue = fabricData[currentRow][Y + widthCounter]
+        if ( currentFabricInchValue && currentFabricInchValue !== -1) {
           overlappingClaims++;
+          fabricData[currentRow][Y + widthCounter] = -1
+          uniqueFabricClaims[currentFabricInchValue] = false
+          uniqueFabricClaims[claimID] = false
+        } else if (currentFabricInchValue !== -1) {
+          fabricData[currentRow][Y + widthCounter] = claimID;
+          if (uniqueFabricClaims[claimID] !== false) { // if the claim is not registed as duplicate
+            uniqueFabricClaims[claimID] = true
+
+          }
+        } else {
+          uniqueFabricClaims[claimID] = false
         }
-        fabricData[currentRow][Y + widthCounter]++;
         widthCounter++;
       }
       currentRow++;
     }
   }
-  return overlappingClaims;
+  let totalIDS = Object.keys(uniqueFabricClaims)
+  let uniqueID = 0
+  totalIDS.forEach(id => {
+      if (uniqueFabricClaims[id]) {
+        uniqueID = id
+      }
+  })
+  console.log('OVERLAPPING CLAIMS: ' + overlappingClaims);
+  console.log('UNIQUE CLAIM ID: ' + uniqueID);
 } 
-claims = [
+
+let claims = [
 '#1 @ 49,222: 19x20',
 '#2 @ 162,876: 28x29',
 '#3 @ 28,156: 17x18',
@@ -1331,5 +1356,4 @@ claims = [
 '#1287 @ 152,94: 10x27',
 ];
 
-// Part 1
-findOverlappingParts(claims);
+mapFabrics(claims);
