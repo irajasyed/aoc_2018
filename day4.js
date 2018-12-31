@@ -23,10 +23,11 @@ class TimeSheet {
    * @return {object} Array of Parsed Data
    */
   getParsedData (logs) {
-    let re = /\[(.+)\].*#?(\d+)?/ // TODO update REGEX
+    let re = /\[(.+)\]\s\w+\s#?(\d+)?/ // TODO update REGEX
     let guardID = ''
     return logs.map(logLine => {
-      return [<date>, #ID, type(0/1/2)]
+      let match = logLine.match(re).slice(1,3)
+      return [match[0], guardID, type]
     })
   }
   /**
