@@ -1,17 +1,3 @@
-/*
-TODO:
-    SETUP:
-    - parse data
-    - order log data - chronological
-    - ID key in hash table
-    - value as minutes array (index => mins, value => count of mins on all days)
-        - sleeping minutes will be incremented at each log traversal
-
-    PART 1:
-    - count all values in array - find max with ID.
-    - with found ID, get index with max value.
-    - multiply index with ID.
-*/
 let fs = require('fs')
 class TimeSheet {
   constructor () {
@@ -36,6 +22,12 @@ class TimeSheet {
       return [match[0], guardID, type]
     })
   }
+  /**
+   * @function getType
+   * Type 0 - Guard Shift Change / 1 - Falls Asleep / 2 - Wakes up
+   * @param  {string} logLine line of log
+   * @return {number} Type
+   */
   getType (logLine) {
     let type = ''
     if (logLine.includes('falls asleep')) {
@@ -58,7 +50,7 @@ class TimeSheet {
   }
   /**
    * @function accumulateData
-   * @return {type} {description}
+   * Accumulate all date's data per guard into a midnight minutes array 0 - 59
    */
   accumulateData () {
     let currentGuardID = ''
@@ -95,6 +87,11 @@ class TimeSheet {
   getMostCommonMinute (guardID) {
     return this.guards[guardID].indexOf(Math.max(...this.guards[guardID]))
   }
+  /**
+   * @function getLongSleptGuard
+   * finds guard who slept most in all day
+   * @return {number} Guard ID
+   */
   getLongSleptGuard () {
     let longSleptGuard = ''
     let maxGuardSleptTime = 0
@@ -113,18 +110,46 @@ class TimeSheet {
     return longSleptGuard;
   }
   /**
-   * @function findGuardMultipliedWithMinutes
+   * @function part1
+   * Part 1 of Day 4
+   */
+  part1 () {
+    let longSleptGuard = this.getLongSleptGuard()
+    let commonMinute = this.getMostCommonMinute(longSleptGuard)
+    console.log('Part 1 Answer:', longSleptGuard * commonMinute)
+  }
+  /**
+   * @function part2
+   * Part 2 of Day 4
+   */
+  part2 () {
+    let currentMax = 0
+    let currentGuard = ''
+    let mostFreqMin = -1
+    let allGuards = Object.keys(this.guards)
+    for (let i =0; i < allGuards.length; i++) {
+      let guard = allGuards[i]
+      for(let j = 0; j < this.guards[guard].length; j++) {
+        if (currentMax <  this.guards[guard][j]) {
+          currentMax = this.guards[guard][j]
+          mostFreqMin = j
+          currentGuard = guard
+        }
+      }
+    }
+    console.log('Part 2 Answer:', mostFreqMin * currentGuard)
+  }
+  /**
+   * @function executeStrategies
    * @return {number} Guard ID multiplied with Minute
    */
-  findGuardMultipliedWithMinutes () {
+  executeStrategies () {
     fs.readFile('./input.txt', 'utf8', (err, data) => {
       if (!err) {
         this.prepareData(data)
         this.accumulateData()
-
-        let longSleptGuard = this.getLongSleptGuard()
-        let commonMinute = this.getMostCommonMinute(longSleptGuard)
-        console.log('Answer', longSleptGuard, commonMinute, longSleptGuard * commonMinute)
+        this.part1()
+        this.part2()
       } else {
         console.log(err)
       }
@@ -135,7 +160,6 @@ class TimeSheet {
 
 function run () {
   let guards = new TimeSheet()
-  // Part 1
-  guards.findGuardMultipliedWithMinutes()
+  guards.executeStrategies()
 }
 run()
