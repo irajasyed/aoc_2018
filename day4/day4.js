@@ -48,22 +48,13 @@ class TimeSheet {
     return type
   }
   /**
-   * @function getOrderedData
-   * Order by Timestamp ASC.
-   * @return {object} Array of Ordered Data
-   */
-  getOrderedData (logs) {
-    return logs.sort()
-  }
-  /**
    * @function prepareData
    * Convert File Logs to readable formatted Array
    * @return {object} Array of formatted Data
    */
   prepareData (data) {
-    let logLines = data.split('\n')
-    let parsedLines = this.getParsedData(logLines)
-    this.inputData = this.getOrderedData(parsedLines)
+    let logLines = data.split('\n').sort()
+    this.inputData = this.getParsedData(logLines)
   }
   /**
    * @function accumulateData
@@ -96,7 +87,6 @@ class TimeSheet {
         currentGuardID = this.inputData[i][1]
       }
     }
-    console.log(JSON.stringify(this.guards))
   }
   /**
    * @function getMostCommonMinute
@@ -115,7 +105,6 @@ class TimeSheet {
       for(let j = 0; j < this.guards[guard].length; j++) {
         guardTOTAL += this.guards[guard][j] 
       }
-      console.log(guard, guardTOTAL)
       if (maxGuardSleptTime < guardTOTAL) {
         longSleptGuard = guard
         maxGuardSleptTime = guardTOTAL
@@ -146,8 +135,7 @@ class TimeSheet {
 
 function run () {
   let guards = new TimeSheet()
-  
+  // Part 1
   guards.findGuardMultipliedWithMinutes()
-  // console.log('Answer:', answer)
 }
 run()
